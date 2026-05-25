@@ -1,0 +1,294 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Landing from "@components/Landing.astro";
+import CSPicture from "@components/TemplateComponents/CSPicture.astro";
+import aboutImage from "@assets/images/about.jpg"; // <-- Add this line
+
+// Optimize our landing image and pass it as props to the BaseLayout (for preloading) and Landing (for rendering)
+import landingImage from "@assets/images/landing.jpg"; // <-- THE PATH TO THE ASSET YOU WANT TO PRELOAD - The asset must live in src
+import { getImage } from "astro:assets";
+const optimizedImage = await getImage({ src: landingImage, format: "avif" });
+---
+
+<BaseLayout
+  title="About Kendomon Motors | Driving Trust, Delivering Quality Cars"
+  description="Learn the story behind Kendomon Motors — our commitment to quality vehicles, honest service, and helping every driver find their perfect car with confidence."
+  preloadedImage={optimizedImage}
+>
+  <!-- ============================================ -->
+  <!--                    LANDING                   -->
+  <!-- ============================================ -->
+
+  <Landing title="About Us" image={optimizedImage} />
+
+  <!-- ============================================ -->
+  <!--                 Side By Side                 -->
+  <!-- ============================================ -->
+
+  <section id="sbs-1278">
+    <div class="cs-container">
+      <div class="cs-picture">
+        <Image
+          src={aboutImage}
+          alt="Kendomon Motors Showroom"
+          widths={[480, 768, 1024, 1280, 1600, 2048]}
+          sizes="(max-width: 600px) 100vw, 50vw"
+          format="webp"
+          loading="lazy"
+        />
+      </div>
+      <div class="cs-content">
+        <div class="cs-flex">
+          <span class="cs-topper">About Kendonmon Motors</span>
+          <h2 class="cs-title">Driving Trust, Delivering Quality Cars</h2>
+        </div>
+        <p class="cs-text">
+          Kendomon Motors is Abuja's trusted automotive partner, dedicated to
+          connecting you with your perfect vehicle. Located in Nigeria's capital
+          city, we specialize in providing quality cars that meet the diverse
+          needs of our customers. Whether you're looking for a reliable family
+          vehicle, a fuel-efficient commuter car, or a luxury ride, we are
+          committed to delivering exceptional service and helping you find the
+          right car at the right price. At Kendomon Motors, we don't just sell
+          cars – we sell value, comfort, and something truly worth it.
+        </p>
+        <a href="/cars" class="cs-button-solid">Views Cars</a>
+      </div>
+    </div>
+    <picture class="cs-background">
+      <!--Mobile Image-->
+      <source
+        media="(max-width: 600px)"
+        srcset="/assets/svgs/white-waves-m.svg"
+      />
+      <!--Tablet and above Image-->
+      <source
+        media="(min-width: 601px)"
+        srcset="/assets/svgs/white-waves.svg"
+      />
+      <img
+        loading="lazy"
+        decoding="async"
+        src="/assets/svgs/white-waves.svg"
+        alt="waves"
+        width="960"
+        height="839"
+      />
+    </picture>
+  </section>
+</BaseLayout>
+
+<style lang="less">
+  /*-- -------------------------- -->
+<---        Side By Side        -->
+<--- -------------------------- -*/
+
+  /* Mobile - 360px */
+  @media only screen and (min-width: 0rem) {
+    #sbs-1278 {
+      padding: var(--sectionPadding);
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+
+      .cs-container {
+        width: 100%;
+        /* changes to 1280px at desktop */
+        max-width: (850/16rem);
+        margin: auto;
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        flex-direction: column;
+        /* 48px - 108px */
+        gap: clamp(3rem, 5vw, 6.75rem);
+      }
+
+      .cs-content {
+        /* set text align to left if content needs to be left aligned */
+        text-align: left;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        /* centers content horizontally, set to flex-start to left align */
+        align-items: flex-start;
+      }
+
+      .cs-title {
+        max-width: 20ch;
+      }
+
+      .cs-text {
+        margin-bottom: (16/16rem);
+        &:last-of-type {
+          margin-bottom: (32/16rem);
+        }
+      }
+
+      .cs-button-solid {
+        font-size: (16/16rem);
+        /* 46px - 56px */
+        line-height: clamp(2.875em, 5.5vw, 3.5em);
+        text-decoration: none;
+        font-weight: 700;
+        text-align: center;
+        margin: 0;
+        color: #fff;
+        border: none;
+        min-width: (150/16rem);
+        padding: 0 (24/16rem);
+        background-color: var(--primary);
+        border-radius: (4/16rem);
+        overflow: hidden;
+        display: inline-block;
+        position: relative;
+        z-index: 1;
+        /* prevents padding from adding to the width */
+        box-sizing: border-box;
+        transition: color 0.3s;
+
+        &:before {
+          content: "";
+          position: absolute;
+          height: 100%;
+          width: 0%;
+          background: #000;
+          opacity: 1;
+          top: 0;
+          left: 0;
+          z-index: -1;
+          transition: width 0.3s;
+        }
+
+        &:hover {
+          color: #fff;
+          &:before {
+            width: 100%;
+          }
+        }
+      }
+
+      .cs-picture {
+        width: 100%;
+        aspect-ratio: 4 / 3; /* mobile-friendly */
+        border-radius: (20/16rem);
+        overflow: hidden;
+        display: block;
+        order: 2;
+        position: relative;
+        z-index: 1;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center top;
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+      }
+
+      .cs-background {
+        width: 100%;
+        height: 50%;
+        background-color: #1a1a1a;
+        display: block;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: -1;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+      }
+    }
+  }
+
+  /* Tablet - 768px */
+  @media only screen and (min-width: 48rem) {
+    #sbs-1278 {
+      .cs-content {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        row-gap: (32/16rem);
+      }
+
+      .cs-flex {
+        width: 45%;
+      }
+
+      .cs-title {
+        margin: 0;
+      }
+
+      .cs-text {
+        width: 50%;
+      }
+
+      .cs-button-solid {
+        margin-right: auto;
+      }
+    }
+  }
+
+  /* Desktop - 1024px */
+  @media only screen and (min-width: 64rem) {
+    #sbs-1278 {
+      /* moved padding back to the section container */
+      padding: var(--sectionPadding);
+
+      .cs-container {
+        max-width: (1280/16rem);
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .cs-content {
+        width: 100%;
+        max-width: (433/16rem);
+        margin: 0;
+        flex-direction: column;
+        order: 2;
+        row-gap: 0;
+      }
+
+      .cs-flex {
+        width: 100%;
+      }
+
+      .cs-title {
+        margin: 0 0 (16/16rem) 0;
+        color: var(--headerColor);
+      }
+
+      .cs-text {
+        width: 100%;
+      }
+
+      .cs-picture {
+        max-width: (738/16rem);
+        order: 1;
+      }
+
+      .cs-background {
+        width: 60vw;
+        height: 100%;
+        /* 172px - 336px */
+        margin-right: clamp(11.125rem, 30vw, 21rem);
+        left: auto;
+        right: 50%;
+        top: 0;
+      }
+    }
+  }
+</style>

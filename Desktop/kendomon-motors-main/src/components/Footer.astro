@@ -1,0 +1,312 @@
+---
+import client from "@data/client.json";
+import navData from "@data/navData.json";
+import { getCurrentYear } from "@js/utils";
+
+const currentYear = getCurrentYear();
+---
+
+<!-- ============================================ --><!--                  Footer                      --><!-- ============================================ -->
+<footer id="footer-1390">
+  <div class="cs-container">
+    <div class="cs-top">
+      <!-- Use your local logo and add the site name for screen readers -->
+      <a aria-label="go back to home" class="cs-logo" href="/">
+        <img
+          class="cs-logo-img"
+          loading="lazy"
+          decoding="async"
+          src="/assets/svgs/Kendomon.svg"
+          alt="logo"
+          width="209"
+          height="40"
+        />
+      </a>
+      <!-- Navigation links are now dynamically generated from navData.json -->
+      <ul class="cs-ul">
+        {
+          navData.map((item) => (
+            <li class="cs-li">
+              <a href={item.url} class="cs-link">
+                {item.key}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div class="cs-bottom">
+      <!--Social-->
+      <ul class="cs-social">
+        <li class="cs-social-li">
+          <a
+            href="https://www.facebook.com/p/Kendomon-motors-61566184930588/"
+            class="cs-social-link"
+            aria-label="facebook"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              class="cs-social-icon cs-default"
+              src="/assets/svgs/facebook-ba.svg"
+              alt="icon"
+              loading="lazy"
+              decoding="async"
+              width="12"
+              height="12"
+              aria-hidden="true"
+            />
+          </a>
+        </li>
+        <li class="cs-social-li">
+          <a
+            href="https://www.tiktok.com/@kendomon.motors"
+            class="cs-social-link"
+            aria-label="twitter"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              class="cs-social-icon cs-default"
+              src="/assets/svgs/tiktok-ba.svg"
+              alt="icon"
+              loading="lazy"
+              decoding="async"
+              width="12"
+              height="12"
+              aria-hidden="true"
+            />
+          </a>
+        </li>
+        <li class="cs-social-li">
+          <a
+            href="https://www.instagram.com/kendomon_motors/"
+            class="cs-social-link"
+            aria-label="instagram"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              class="cs-social-icon cs-default"
+              src="/assets/svgs/instagram-ba.svg"
+              alt="icon"
+              loading="lazy"
+              decoding="async"
+              width="12"
+              height="12"
+              aria-hidden="true"
+            />
+          </a>
+        </li>
+        <li class="cs-social-li">
+          <a
+            href="https://www.youtube.com/@kendomonmotors/videos"
+            class="cs-social-link"
+            aria-label="youtube"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              class="cs-social-icon cs-default"
+              src="/assets/svgs/youtube-ba.svg"
+              alt="icon"
+              loading="lazy"
+              decoding="async"
+              width="12"
+              height="12"
+              aria-hidden="true"
+            />
+          </a>
+        </li>
+      </ul>
+      <!-- Copyright is now dynamic -->
+      <span class="cs-copyright">
+        © Copyright {currentYear} - <a href="/" class="cs-copyright-link"
+          >{client.name}</a
+        >
+      </span>
+      <div class="cs-flex">
+        <a
+          href="https://claude.ai/public/artifacts/ba5810f8-2cc9-447e-9bf5-ab53647a860a"
+          class="cs-copyright-link">Privacy Policy</a
+        >
+        <span class="cs-separater">|</span>
+        <a
+          href="https://claude.ai/public/artifacts/ba5810f8-2cc9-447e-9bf5-ab53647a860a"
+          class="cs-copyright-link">Terms of Use</a
+        >
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style lang="less">
+  /*-- -------------------------- -->
+<---          Footer            -->
+<--- -------------------------- -*/
+
+  /* Mobile - 360px */
+  @media only screen and (min-width: 0rem) {
+    #footer-1390 {
+      padding: var(--sectionPadding);
+      background-color: var(--primary);
+      position: relative;
+      z-index: 1;
+
+      .cs-container {
+        width: 100%;
+        max-width: (1280/16rem);
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cs-top {
+        width: 100%;
+        margin-bottom: (40/16rem);
+        /* 24px - 64px */
+        padding-bottom: clamp(1.5rem, 5vw, 4rem);
+        border-bottom: 1px solid #fafbfc;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        /* 24px - 40px */
+        gap: clamp(1.25rem, 4vw, 2.5rem);
+      }
+
+      .cs-ul {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        row-gap: (8/16rem);
+        /* 24px - 36px */
+        column-gap: clamp(1.5rem, 4vw, 2.25rem);
+      }
+
+      .cs-li {
+        list-style: none;
+      }
+
+      .cs-link {
+        /* 14px - 16px */
+        font-size: clamp(0.875rem, 1.5vw, 1rem);
+        line-height: 1.5em;
+        text-decoration: none;
+        margin: 0;
+        color: #fafbfc;
+        display: block;
+        transition: color 0.3s;
+
+        &:hover {
+          color: var(--bodyTextColorWhite);
+        }
+      }
+
+      .cs-logo {
+        width: 100%;
+        max-width: (209/16rem);
+        height: auto;
+        display: block;
+      }
+
+      .cs-logo-img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .cs-bottom {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: (16/16rem);
+      }
+
+      .cs-social {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: (8/16rem);
+      }
+
+      .cs-social-li {
+        list-style: none;
+      }
+
+      .cs-social-link {
+        width: (32/16rem);
+        height: (32/16rem);
+        background-color: #fafbfc;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.3s;
+      }
+
+      .cs-social-icon {
+        width: (12/16rem);
+        height: auto;
+        display: block;
+        opacity: 0.6;
+        transition: opacity 0.3s;
+      }
+
+      .cs-copyright {
+        font-size: (16/16rem);
+        color: #fafbfc;
+        line-height: 1.5em;
+        margin: 0;
+        display: block;
+      }
+
+      .cs-copyright-link,
+      .cs-separater {
+        font-size: (16/16rem);
+        text-decoration: none;
+        color: #fafbfc;
+        transition: color 0.3s;
+
+        &:hover {
+          color: var(--bodyTextColorWhite);
+        }
+      }
+
+      .cs-separater {
+        margin: 0 (16/16rem);
+        display: inline-block;
+      }
+    }
+  }
+
+  /* Tablet - 768px */
+  @media only screen and (min-width: 48rem) {
+    #footer-1390 {
+      .cs-top {
+        align-items: flex-start;
+      }
+
+      .cs-bottom {
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .cs-flex {
+        margin: 0 auto;
+      }
+
+      .cs-social {
+        /* sends it to the right in the 3rd position */
+        order: 3;
+      }
+    }
+  }
+</style>

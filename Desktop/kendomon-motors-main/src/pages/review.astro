@@ -1,0 +1,27 @@
+---
+// src/pages/review.astro
+
+// The target URL for your Google Reviews
+const targetUrl =
+  "https://search.google.com/local/writereview?placeid=ChIJsRsllanfTRARQGQ9BDw1PVI";
+
+// This tells Astro to redirect the user immediately
+return Astro.redirect(targetUrl);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting to Google Reviews...</title>
+    <meta http-equiv="refresh" content={`0;url=${targetUrl}`} />
+    <meta name="robots" content="noindex" />
+  </head>
+  <body>
+    <p>Redirecting you to our review page...</p>
+    <p>
+      If you are not redirected automatically,
+      <a href={targetUrl}>click here</a>.
+    </p>
+  </body>
+</html>

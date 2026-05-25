@@ -1,0 +1,28 @@
+---
+import { getCollection } from "astro:content";
+import Hero from "@components/Hero";
+
+// Get all cars to build filter options
+const allCars = await getCollection("cars");
+const uniqueMakes = [...new Set(allCars.map((c) => c.data.make))].sort();
+const years = allCars.map((c) => c.data.year).filter(Boolean);
+const minYear = years.length ? Math.min(...years) : 2000;
+const maxYear = years.length ? Math.max(...years) : new Date().getFullYear();
+
+const prices = allCars.map((c) => c.data.price).filter(Boolean);
+const minPrice = prices.length ? Math.min(...prices) : 300000;
+const maxPrice = prices.length ? Math.max(...prices) : 300000000;
+
+// ✅ Accept heroImageUrl as a prop from parent
+const { heroImageUrl } = Astro.props;
+---
+
+<Hero
+  client:load
+  makes={uniqueMakes}
+  minYear={minYear}
+  maxYear={maxYear}
+  minPrice={minPrice}
+  maxPrice={maxPrice}
+  heroImageUrl={heroImageUrl}
+/>

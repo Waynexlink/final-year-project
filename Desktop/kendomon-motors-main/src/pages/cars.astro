@@ -1,0 +1,133 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Landing from "@components/Landing.astro";
+import { getCollection } from "astro:content";
+import CarInventory from "@components/CarInventory";
+// Optimize our landing image and pass it as props to the BaseLayout (for preloading) and Landing (for rendering)
+import landingImage from "@assets/images/landing.jpg"; // <-- THE PATH TO THE ASSET YOU WANT TO PRELOAD - The asset must live in src
+import { getImage } from "astro:assets";
+const optimizedImage = await getImage({ src: landingImage, format: "avif" });
+
+// Correct way to get query params
+const url = new URL(Astro.request.url);
+
+const filterMake = url.searchParams.get("make") || "";
+const filterYear = url.searchParams.get("year") || "";
+const filterMinPrice = url.searchParams.get("minPrice") || "";
+const filterMaxPrice = url.searchParams.get("maxPrice") || "";
+
+// Get all cars from the content collection
+const allCars = await getCollection("cars");
+
+let filteredCars = allCars;
+
+// Filter by make
+if (filterMake && filterMake !== "Any Make") {
+  filteredCars = filteredCars.filter(
+    (car) => car.data.make.toLowerCase() === filterMake.toLowerCase(),
+  );
+}
+
+// Filter by year
+if (filterYear && filterYear !== "Any Year") {
+  const yearNum = parseInt(filterYear);
+  filteredCars = filteredCars.filter((car) => car.data.year === yearNum);
+}
+
+// Filter by price range
+if (filterMinPrice) {
+  const minPrice = parseFloat(filterMinPrice);
+  filteredCars = filteredCars.filter((car) => car.data.price >= minPrice);
+}
+
+if (filterMaxPrice) {
+  const maxPrice = parseFloat(filterMaxPrice);
+  filteredCars = filteredCars.filter((car) => car.data.price <= maxPrice);
+}
+
+// Sort by newest first
+const sortedCars = filteredCars.sort(
+  (a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime(),
+);
+
+// Prepare car data for the React component
+const carsData = sortedCars.map((car) => {
+  const heroImageSrc = car.data.heroImage.src;
+
+  return {
+    slug: car.id,
+    make: car.data.make,
+    model: car.data.model,
+    year: car.data.year,
+    price: car.data.price,
+    transmission: car.data.transmission,
+    heroImage: { src: heroImageSrc },
+    heroImageAlt: car.data.heroImageAlt,
+    condition: car.data.condition,
+    featured: car.data.featured,
+  };
+});
+
+// Get unique makes for filter dropdown
+const uniqueMakes = [...new Set(allCars.map((car) => car.data.make))].sort();
+
+// Get year range for filter
+const years = allCars.map((car) => car.data.year);
+const minYear = Math.min(...years);
+const maxYear = Math.max(...years);
+---
+
+<BaseLayout
+  title="Our Cars - Browse Our Inventory"
+  description="Browse our selection of quality used cars. Find your perfect vehicle today."
+>
+  <!-- Page Header -->
+  <!-- ============================================ -->
+  <!--                    LANDING                   -->
+  <!-- ============================================ -->
+
+  <Landing title="Our Cars" image={optimizedImage} />
+
+  <!-- Car Inventory with React filtering -->
+  <CarInventory
+    client:load
+    cars={carsData}
+    makes={uniqueMakes}
+    minYear={minYear}
+    maxYear={maxYear}
+  />
+</BaseLayout>
+
+<style lang="less">
+  .cars-header {
+    padding: var(--sectionPadding);
+    background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+    text-align: center;
+
+    .cs-container {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .cs-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--headerColor);
+    }
+
+    .cs-text {
+      font-size: 1.125rem;
+      color: var(--bodyTextColor);
+      max-width: 40rem;
+      margin: 0 auto;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .cars-header {
+      padding: 6rem 0 2rem;
+    }
+  }
+</style>

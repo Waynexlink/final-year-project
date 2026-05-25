@@ -1,0 +1,15 @@
+{
+  "name": "Kendomon Motors",
+  "email": "info@kendomonmotors.com",
+  "phoneForTel": "2348159500119",
+  "phoneFormatted": "+234 815 950 0119",
+  "address": {
+    "lineOne": "Express Road, Opp. Vitafoam",
+    "lineTwo": "Gwarinpa Estate",
+    "city": "Abuja",
+    "state": "Federal Capital Territory",
+    "zip": "900108",
+    "mapLink": "https://goo.gl/maps/UAQn4vuGDiwv7DV39"
+  },
+  "domain": "www.kendomonmotors.com"
+}

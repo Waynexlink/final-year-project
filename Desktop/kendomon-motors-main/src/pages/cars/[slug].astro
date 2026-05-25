@@ -1,0 +1,1146 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { Picture } from "astro:assets";
+
+export async function getStaticPaths() {
+  const cars = await getCollection("cars");
+  return cars.map((car) => ({
+    params: { slug: car.id },
+    props: { car },
+  }));
+}
+
+const { car } = Astro.props;
+const rendered = car.rendered;
+
+// ✅ Helper functions
+const formatPrice = (price) =>
+  price
+    ? new Intl.NumberFormat("en-NG", {
+        style: "currency",
+        currency: "NGN",
+        minimumFractionDigits: 0,
+      }).format(price)
+    : null;
+
+const formatMileage = (mileage) =>
+  mileage != null ? new Intl.NumberFormat("en-US").format(mileage) : "—";
+
+// ✅ Dynamic SEO-friendly meta content
+const carTitle = `${car.data.year} ${car.data.make} ${car.data.model}`;
+const formattedPrice = formatPrice(car.data.price);
+
+const pageTitle = `${carTitle}`;
+const metaDescription = formattedPrice
+  ? `Explore the ${carTitle} at Kendomon Motors — priced at ${formattedPrice}. Experience premium performance, comfort, and style today.`
+  : `Discover the ${carTitle} at Kendomon Motors — designed for drivers who value performance, comfort, and style.`;
+
+// ✅ Handle hero + gallery images (removes duplicates and falsy entries)
+const allImages = [
+  car.data.heroImage,
+  ...((car.data.galleryImages || []).filter(
+    (img) => img && img.src !== car.data.heroImage?.src
+  )),
+].filter(Boolean);
+
+// ✅ Use hero image as primary OG/Twitter image
+const preloadedImage = allImages.length > 0 ? allImages[0] : undefined;
+
+---
+
+<BaseLayout title={pageTitle} description={metaDescription}>
+  <!-- ✅ Preload gallery images for faster switching -->
+  <link rel="preload" as="image" href={allImages[0]?.src ?? (typeof allImages[0] === 'string' ? allImages[0] : '')} slot="head" />
+  {allImages.slice(1, 4).map(img => (
+    <link 
+      rel="preload" 
+      as="image" 
+      href={typeof img === "string" ? img : img?.src?.startsWith("/") ? img.src : `/` + img?.src} 
+      slot="head" 
+    />
+  ))}
+
+  <section class="car-detail">
+    <div class="detail-container">
+      <!-- Title, Price & CTA Section - Immediately after nav -->
+      <div class="hero-section">
+        <h1 class="page-title">{pageTitle}</h1>
+        <p class="page-price">{formatPrice(car.data.price)}</p>
+        
+        <div class="cta-buttons">
+          <a href="tel:+2348159500119" class="btn-call">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            Call now
+          </a>
+          <button id="wa-trigger" class="btn-whatsapp" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path>
+            </svg>
+            WhatsApp
+          </button>
+        </div>
+      </div>
+
+      <!-- Image Gallery with Thumbnails -->
+      <div class="gallery-section">
+        <div class="main-image-container">
+          <!-- Main image: use a plain <img> so JS swapping is simple and reliable -->
+          <img
+            id="mainImage"
+            class="main-image"
+            src={allImages[0]?.src ?? (typeof allImages[0] === 'string' ? allImages[0] : '')}
+            alt={car.data.heroImageAlt ?? pageTitle}
+            loading="eager"
+            width="1200"
+          />
+          
+          {allImages.length > 1 && (
+            <button class="nav-arrow nav-arrow-prev" id="prevBtn" aria-label="Previous image">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button class="nav-arrow nav-arrow-next" id="nextBtn" aria-label="Next image">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {allImages.length > 1 && (
+          <div class="thumbnails-container">
+            {allImages.map((image, index) => (
+              <button
+                class={`thumbnail ${index === 0 ? 'thumbnail-active' : ''}`}
+                data-index={index}
+                data-fullsrc={
+                  typeof image === "string"
+                    ? image
+                    : image?.src?.startsWith("/") 
+                      ? image.src 
+                      : `/` + image?.src
+                }
+                type="button"
+              >
+                <Picture
+                  src={image}
+                  alt={`${pageTitle} - View ${index + 1}`}
+                  widths={[150]}
+                  formats={["avif", "webp"]}
+                  loading="lazy"
+                  class="thumbnail-image"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <!-- Description Section -->
+      <div class="content-section">
+        <h2 class="section-heading">Description</h2>
+        <div class="description-content">
+          {rendered?.html ? (
+            <Fragment set:html={rendered.html} />
+          ) : (
+            <p>{car.data.description ?? ""}</p>
+          )}
+        </div>
+      </div>
+
+      <!-- Vehicle Specifications - Modern Card Grid -->
+      <div class="content-section">
+        <h2 class="section-heading">Vehicle Specifications</h2>
+        <div class="specs-grid">
+          <div class="spec-card">
+            <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <div class="spec-content">
+              <div class="spec-label">Year</div>
+              <div class="spec-value">{car.data.year}</div>
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+              <circle cx="9" cy="13" r="2"></circle>
+            </svg>
+            <div class="spec-content">
+              <div class="spec-label">Make</div>
+              <div class="spec-value">{car.data.make}</div>
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+            <div class="spec-content">
+              <div class="spec-label">Model</div>
+              <div class="spec-value">{car.data.model}</div>
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <div class="spec-content">
+              <div class="spec-label">Mileage</div>
+              <div class="spec-value">{formatMileage(car.data.mileage)} mi</div>
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div class="spec-content">
+              <div class="spec-label">Transmission</div>
+              <div class="spec-value">{car.data.transmission}</div>
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+            <div class="spec-content">
+              <div class="spec-label">Engine Size</div>
+              <div class="spec-value">{car.data.engineSize}</div>
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            <div class="spec-content">
+              <div class="spec-label">Fuel Type</div>
+              <div class="spec-value">{car.data.fuelType}</div>
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <div class="spec-content">
+              <div class="spec-label">Condition</div>
+              <div class="spec-value">{car.data.condition}</div>
+            </div>
+          </div>
+
+          {car.data.location && (
+            <div class="spec-card">
+              <svg class="spec-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <div class="spec-content">
+                <div class="spec-label">Location</div>
+                <div class="spec-value">{car.data.location}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Back to Inventory -->
+      <div class="back-link">
+        <a href="/cars">← Back to All Cars</a>
+      </div>
+    </div>
+    <!-- WhatsApp Pre-qualifying Modal -->
+<div id="wa-modal" role="dialog" aria-modal="true" aria-labelledby="wa-modal-title" style="display:none;">
+  <div class="modal-backdrop" id="wa-backdrop"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <p class="modal-eyebrow">One quick question</p>
+        <h2 id="wa-modal-title" class="modal-title">Before we connect you on WhatsApp</h2>
+      </div>
+      <button class="modal-close" id="wa-close" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-car-info">
+      <p class="modal-car-label">Enquiring about</p>
+      <p class="modal-car-name" id="wa-car-name">
+        {car.data.year} {car.data.make} {car.data.model} — {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0 }).format(car.data.price)}
+      </p>
+    </div>
+
+    <p class="modal-question">Are you available for a physical inspection at our Abuja showroom?</p>
+
+    <div class="modal-options" id="wa-options">
+      <label class="modal-option">
+        <input type="radio" name="inspection" value="Yes, I can visit within this week">
+        <span>Yes — I can visit within this week</span>
+      </label>
+      <label class="modal-option">
+        <input type="radio" name="inspection" value="Yes, but I need to schedule for a later date">
+        <span>Yes — but I need to schedule for a later date</span>
+      </label>
+      <label class="modal-option">
+        <input type="radio" name="inspection" value="No, I prefer home delivery / remote purchase">
+        <span>No — I prefer home delivery or remote purchase</span>
+      </label>
+      <label class="modal-option">
+        <input type="radio" name="inspection" value="Not sure yet, still exploring">
+        <span>Not sure yet — still exploring</span>
+      </label>
+    </div>
+
+    <p class="modal-error" id="wa-error" style="display:none;">Please select an option to continue.</p>
+
+    <button class="modal-submit" id="wa-submit" type="button">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Continue to WhatsApp
+    </button>
+  </div>
+</div>
+  </section>
+
+  <!-- Gallery Navigation Script -->
+  <script src="@js/gallery.js"></script>
+  <script>
+(function() {
+  const modal    = document.getElementById('wa-modal');
+  const trigger  = document.getElementById('wa-trigger');
+  const closeBtn = document.getElementById('wa-close');
+  const backdrop = document.getElementById('wa-backdrop');
+  const submit   = document.getElementById('wa-submit');
+  const errorMsg = document.getElementById('wa-error');
+
+  if (!modal || !trigger) return;
+
+  // --- Helpers ---
+  function openModal() {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    // Move focus into modal for accessibility
+    setTimeout(() => {
+      const firstRadio = modal.querySelector('input[type="radio"]');
+      if (firstRadio) firstRadio.focus();
+    }, 100);
+  }
+
+  function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    trigger.focus();
+  }
+
+  // --- UTM passthrough ---
+  // Grabs any UTM params from the landing URL so your sales rep
+  // knows which ad drove the enquiry
+  function getUtmSuffix() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const utms = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+      const parts = utms
+        .filter(k => params.has(k))
+        .map(k => `${k}: ${params.get(k)}`);
+      return parts.length ? `\n\n[Ad ref: ${parts.join(', ')}]` : '';
+    } catch { return ''; }
+  }
+
+  // --- Open ---
+  trigger.addEventListener('click', openModal);
+
+  // --- Close ---
+  closeBtn.addEventListener('click', closeModal);
+  backdrop.addEventListener('click', closeModal);
+
+  // ESC key closes modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeModal();
+    }
+  });
+
+  // --- Submit ---
+ submit.addEventListener('click', () => {
+  const selected = modal.querySelector('input[name="inspection"]:checked');
+
+  if (!selected) {
+    errorMsg.style.display = 'block';
+    return;
+  }
+  errorMsg.style.display = 'none';
+
+  const carName = document.getElementById('wa-car-name')?.textContent?.trim() || '';
+  const answer  = selected.value;
+  const utm     = getUtmSuffix();
+
+  // Generate one shared ID for both pixel and CAPI
+  // Meta uses this to know they are the same event
+  const eventId = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `lead_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+  // Helper to read browser cookies
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+  }
+
+  // 1. Browser pixel fires with the shared eventId
+  try {
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'Lead',
+        {
+          content_name: carName,
+          content_category: 'Car Enquiry',
+        },
+        { eventID: eventId }
+      );
+    }
+  } catch (err) {
+    console.warn('[wa-modal] fbq error:', err);
+  }
+
+  // 2. Netlify function fires with the same eventId
+  // This runs in the background - it does not slow down the WhatsApp redirect
+  fetch('/netlify/functions/meta-capi', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      event_id: eventId,
+      event_name: 'Lead',
+      event_source_url: window.location.href,
+      fbp: getCookie('_fbp'),
+      fbc: getCookie('_fbc'),
+      client_user_agent: navigator.userAgent,
+      content_name: carName,
+    }),
+  }).catch(err => console.warn('[wa-modal] CAPI error:', err));
+
+  // 3. Open WhatsApp immediately - does not wait for CAPI to finish
+  const message = `Hello Kendomon Motors, I am interested in the ${carName}.\n\nInspection availability: ${answer}${utm}`;
+  const waUrl = `https://wa.me/2348159500119?text=${encodeURIComponent(message)}`;
+  window.open(waUrl, '_blank', 'noopener,noreferrer');
+
+  closeModal();
+});
+
+  // Highlight selected option label
+  modal.addEventListener('change', (e) => {
+    if (e.target.name !== 'inspection') return;
+    // Reset all
+    modal.querySelectorAll('.modal-option').forEach(opt => {
+      opt.style.borderColor = '';
+      opt.style.background  = '';
+    });
+    // Highlight checked (CSS :has handles this in modern browsers,
+    // this JS fallback covers Safari < 15.4)
+    const checked = modal.querySelector('input[name="inspection"]:checked');
+    if (checked) {
+      const label = checked.closest('.modal-option');
+      if (label) {
+        label.style.borderColor = 'hsl(129, 22%, 29%)';
+        label.style.background  = 'hsl(129, 22%, 96%)';
+      }
+    }
+    errorMsg.style.display = 'none';
+  });
+})();
+</script>
+</BaseLayout>
+
+<style lang="less">
+.car-detail {
+  padding: var(--sectionPadding);
+  background: #FFFFFF;
+}
+
+.detail-container {
+  max-width: 75rem;
+  margin: 0 auto;
+  padding: 0 1rem 4rem;
+}
+
+/* Hero Section - Title, Price, CTAs */
+.hero-section {
+  padding: clamp(7rem, 12vw, 10rem) 0 3rem;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.page-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--headerColor);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.page-price {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--headerColor);
+  margin-bottom: 2rem;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-call,
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0;
+  text-decoration: none;
+  min-width: 180px;
+  justify-content: center;
+}
+
+.btn-call {
+  background-color: #1a1a1a;
+  color: #FFFFFF;
+  border: 1px solid #1a1a1a;
+}
+
+.btn-whatsapp {
+  background-color: hsl(129, 22%, 29%);
+  color: #FFFFFF;
+  border: 1px solid hsl(129, 22%, 29%);
+}
+
+/* Gallery Section */
+.gallery-section {
+  padding: 3rem 0;
+}
+
+.main-image-container {
+  position: relative;
+  width: 100%;
+  /* ✅ FIXED: Better aspect ratio for mobile (iPhone photos) */
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 0;
+  background: #f3f4f6;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.85);
+  }
+
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #FFFFFF;
+  }
+}
+
+.nav-arrow-prev {
+  left: 1rem;
+}
+
+.nav-arrow-next {
+  right: 1rem;
+}
+
+/* Thumbnails */
+.thumbnails-container {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 0;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+}
+
+.thumbnail {
+  flex-shrink: 0;
+  width: 120px;
+  height: 90px;
+  border: 2px solid #e5e7eb;
+  border-radius: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #f3f4f6;
+  padding: 0;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #9ca3af;
+  }
+
+  &.thumbnail-active {
+    border-color: #1a1a1a;
+  }
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Content Sections */
+.content-section {
+  padding: 3rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.section-heading {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--headerColor);
+  margin-bottom: 1.5rem;
+}
+
+.description-content {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--bodyTextColor);
+
+  :global(h2), :global(h3) {
+    font-weight: 700;
+    margin: 2rem 0 1rem;
+    color: var(--headerColor);
+  }
+
+  :global(h2) {
+    font-size: 1.5rem;
+  }
+
+  :global(h3) {
+    font-size: 1.25rem;
+  }
+
+  :global(ul), :global(ol) {
+    margin: 1rem 0;
+    padding-left: 2rem;
+  }
+
+  :global(li) {
+    margin: 0.75rem 0;
+  }
+
+  :global(p) {
+    margin: 1rem 0;
+  }
+
+  :global(strong) {
+    font-weight: 700;
+    color: var(--headerColor);
+  }
+}
+
+/* Modern Specs Grid - Card Layout */
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+.spec-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, #3a5a3f, #2d4730);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    border-color: #3a5a3f;
+    box-shadow: 0 4px 12px rgba(58, 90, 63, 0.1);
+    transform: translateY(-2px);
+
+    &::before {
+      transform: scaleY(1);
+    }
+  }
+}
+
+.spec-card-highlight {
+  background: linear-gradient(135deg, #f8faf9 0%, #ffffff 100%);
+  border: 2px solid #3a5a3f;
+
+  .spec-icon {
+    background: #3a5a3f;
+    color: #ffffff;
+  }
+
+  .spec-value {
+    color: #3a5a3f;
+    font-size: 1.375rem;
+  }
+}
+
+.spec-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.625rem;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  color: #3a5a3f;
+  transition: all 0.3s ease;
+}
+
+.spec-card:hover .spec-icon {
+  background: #3a5a3f;
+  color: #ffffff;
+  transform: rotate(5deg) scale(1.05);
+}
+
+.spec-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.spec-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.375rem;
+}
+
+.spec-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--headerColor);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+/* Back Link */
+.back-link {
+  padding-top: 3rem;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--headerColor);
+    text-decoration: none;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0;
+    background-color: #FFFFFF;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f9fafb;
+    }
+  }
+}
+
+/* Responsive */
+@media screen and (min-width: 1024px) {
+  .main-image-container {
+    /* ✅ Wider aspect ratio on desktop */
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .hero-section {
+    padding: 6rem 0 2rem;
+  }
+
+  .cta-buttons {
+    /* ✅ Keep buttons side-by-side on mobile */
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  .btn-call,
+  .btn-whatsapp {
+    /* ✅ Equal width, flexible sizing */
+    flex: 1;
+    min-width: 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.9375rem;
+  }
+
+  .main-image-container {
+    /* ✅ Mobile-friendly aspect ratio for iPhone photos */
+    aspect-ratio: 4 / 3;
+    /* ✅ Increase height on mobile */
+    min-height: 350px;
+  }
+
+  .specs-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .spec-card {
+    padding: 1.25rem;
+  }
+
+  .spec-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0.5rem;
+  }
+
+  .nav-arrow {
+    width: 2.5rem;
+    height: 2.5rem;
+
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  .nav-arrow-prev {
+    left: 0.5rem;
+  }
+
+  .nav-arrow-next {
+    right: 0.5rem;
+  }
+
+  .thumbnail {
+    width: 100px;
+    height: 75px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .page-price {
+    font-size: 1.5rem;
+  }
+
+  .main-image-container {
+    /* ✅ Even more space on small phones */
+    min-height: 300px;
+  }
+
+  .specs-grid {
+    gap: 0.875rem;
+  }
+
+  .spec-card {
+    padding: 1rem;
+    gap: 0.875rem;
+  }
+
+  .spec-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .spec-value {
+    font-size: 1rem;
+  }
+
+  .spec-card-highlight .spec-value {
+    font-size: 1.25rem;
+  }
+
+  .cta-buttons {
+    gap: 0.5rem;
+  }
+
+  .btn-call,
+  .btn-whatsapp {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .thumbnail {
+    width: 80px;
+    height: 60px;
+  }
+
+  .section-heading {
+    font-size: 1.5rem;
+  }
+}
+/* WhatsApp Modal */
+#wa-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+
+  &.is-open {
+    display: flex !important;
+  }
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modal-box {
+  position: relative;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1;
+  animation: modal-in 0.2s ease;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  margin: 0 0 0.25rem;
+}
+
+.modal-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #1a1a1a;
+  }
+}
+
+.modal-car-info {
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-car-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0 0 0.25rem;
+}
+
+.modal-car-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.modal-question {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
+.modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: #9ca3af;
+    background: #f9fafb;
+  }
+
+  input[type="radio"] {
+    accent-color: hsl(129, 22%, 29%);
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+  }
+
+  span {
+    font-size: 0.9375rem;
+    color: #1a1a1a;
+    line-height: 1.4;
+  }
+
+  &:has(input:checked) {
+    border-color: hsl(129, 22%, 29%);
+    background: hsl(129, 22%, 96%);
+  }
+}
+
+.modal-error {
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin: -0.75rem 0 1rem;
+}
+
+.modal-submit {
+  width: 100%;
+  padding: 1rem;
+  background: #25D366;
+  border: none;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  transition: background 0.2s, transform 0.15s;
+
+  &:hover {
+    background: #1fba58;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .modal-box {
+    padding: 1.5rem;
+  }
+}
+</style>

@@ -1,0 +1,168 @@
+---
+import CarCard from "./CarCard.jsx"; // adjust the path if needed
+const { cars } = Astro.props;
+---
+
+<section id="mini-inventory">
+  <div class="cs-container">
+    <div class="cs-content">
+      <span class="cs-topper">Featured Vehicles</span>
+      <h2 class="cs-title">Browse Our Latest Cars</h2>
+      <p class="cs-text">
+        Check out our hand-picked selection of quality vehicles. From luxury
+        sedans to reliable family cars, find your perfect match.
+      </p>
+    </div>
+
+    <div class="cars-grid">
+      {
+        cars.map((car) => (
+          <CarCard
+            car={{
+              slug: car.id,
+              heroImage: car.data.heroImage,
+              heroImageAlt: car.data.heroImageAlt,
+              price: car.data.price,
+              year: car.data.year,
+              make: car.data.make,
+              model: car.data.model,
+              transmission: car.data.transmission,
+              condition: car.data.condition,
+            }}
+          />
+        ))
+      }
+    </div>
+
+    <div class="cta-wrapper">
+      <a href="/cars" class="cs-button-solid">View All Cars</a>
+    </div>
+  </div>
+</section>
+
+<style lang="less">
+  #mini-inventory {
+    padding: var(--sectionPadding);
+    background: #ffffff;
+    position: relative;
+    /* FIXED: Reduced z-index so hero dropdowns appear above */
+    z-index: 1;
+  }
+
+  .cs-container {
+    width: 100%;
+    max-width: 80rem;
+    margin: auto;
+    padding: 0 1rem;
+  }
+
+  .cs-content {
+    text-align: center;
+    width: 100%;
+    max-width: 50rem;
+    margin: 0 auto 4rem;
+  }
+
+  .cs-topper {
+    font-size: var(--topperFontSize);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--secondary);
+    display: block;
+    margin-bottom: 0.75rem;
+    position: relative;
+
+    &::after {
+      content: "";
+      display: block;
+      width: 3rem;
+      height: 3px;
+      background: var(--secondary);
+      margin: 0.75rem auto 0;
+      border-radius: 2px;
+    }
+  }
+
+  .cs-title {
+    font-size: var(--headerFontSize);
+    font-weight: 900;
+    line-height: 1.2em;
+    color: var(--headerColor);
+    margin-bottom: 1.25rem;
+  }
+
+  .cs-text {
+    font-size: var(--bodyFontSize);
+    line-height: 1.6em;
+    color: var(--bodyTextColor);
+    margin: 0;
+  }
+
+  .cars-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .cta-wrapper {
+    text-align: center;
+    margin-top: 4rem;
+  }
+
+  .cs-button-solid {
+    font-size: 1.0625rem;
+    line-height: clamp(2.875rem, 5.5vw, 3.5rem);
+    text-decoration: none;
+    font-weight: 700;
+    margin: auto;
+    color: #ffffff;
+    min-width: 12rem;
+    padding: 0 2.5rem;
+    background-color: var(--primary);
+    border-radius: 0.5rem;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.02em;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.06);
+
+    &::before {
+      content: "";
+      position: absolute;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+      opacity: 1;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      border-radius: 0.5rem;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &:hover::before {
+      width: 100%;
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    .cars-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    .cs-content {
+      margin-bottom: 3rem;
+    }
+    .cars-grid {
+      gap: 2rem;
+    }
+  }
+</style>

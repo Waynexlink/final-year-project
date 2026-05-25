@@ -1,0 +1,254 @@
+/* CODESTITCH STYLES, RESET, HEADER/NAVIGATION AND FOOTER */
+
+/*-- -------------------------- -->
+<---        Core Styles         -->
+<--- -------------------------- -*/
+
+/* CodeStitch Root and Helpers */
+@media only screen and (min-width: 0em) {
+  // Website colors
+  :root {
+    --primary: hsl(129, 22%, 29%);
+    --primaryLight: hsl(129, 22%, 40%);
+    --secondary: hsl(129, 22%, 40%);
+    --secondaryLight: hsl(129, 22%, 40%);
+    --headerColor: #1a1a1a;
+    --bodyTextColor: #4e4b66;
+    --bodyTextColorWhite: #fafbfc;
+
+    /* 13px - 16px */
+    --topperFontSize: clamp(0.8125rem, 1.6vw, 1rem);
+    /* 31px - 49px */
+    --headerFontSize: clamp(1.9375rem, 3.9vw, 3.0625rem);
+    --bodyFontSize: 1rem;
+
+    /* 60px - 100px top and bottom */
+    --sectionPadding: clamp(3.75rem, 7.82vw, 6.25rem) 1rem;
+  }
+
+  // Text styles - can be replaced using CodeStitch's "Content Flair" Stitches
+  .cs-topper {
+    font-size: var(--topperFontSize);
+    font-weight: 700;
+    line-height: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--secondary);
+    display: block;
+  }
+
+  .cs-title {
+    font-size: var(--headerFontSize);
+    font-weight: 900;
+    line-height: 1.2em;
+    margin: 0 auto (16/16rem);
+    color: var(--headerColor);
+    position: relative;
+  }
+
+  .cs-text {
+    font-size: var(--bodyFontSize);
+    line-height: 1.5em;
+    width: 100%;
+    margin: 0 auto;
+    color: var(--bodyTextColor);
+  }
+
+  // Button - can be replaced using CodeStitch's "Button" Stitches
+  .cs-button-solid {
+    font-size: (16/16rem);
+    font-weight: bold;
+    line-height: (50/16em);
+    text-align: center;
+    text-transform: uppercase;
+    text-decoration: none;
+    width: auto;
+    height: (50/16rem);
+    padding: 0 (30/16rem);
+
+    // Transition Properties
+    color: #fff;
+    background-color: var(--primary);
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s;
+    transition-delay: 0.1s;
+
+    &:hover {
+      color: #fff;
+      &:before {
+        width: 100%;
+      }
+    }
+
+    &:before {
+      content: "";
+
+      //Transition properties
+      width: 0;
+      height: 100%;
+      background-color: #000;
+      opacity: 1;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      transition: width 0.3s;
+    }
+  }
+}
+
+/* Fonts and general styles */
+@media only screen and (min-width: 0em) {
+  // Grab your fonts to locally host from https://google-webfonts-helper.herokuapp.com/fonts
+
+  /* montserrat-regular - latin */
+  @font-face {
+    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 400;
+    src: url("/assets/fonts/montserrat-v31-latin-regular.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  }
+  /* montserrat-700 - latin */
+  @font-face {
+    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: "Montserrat";
+    font-style: normal;
+    font-weight: 700;
+    src: url("/assets/fonts/montserrat-v31-latin-700.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  }
+
+  /* lato-regular - latin */
+  @font-face {
+    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: "Lato";
+    font-style: normal;
+    font-weight: 400;
+    src: url("/assets/fonts/lato-v25-latin-regular.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  }
+  /* lato-700 - latin */
+  @font-face {
+    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: "Lato";
+    font-style: normal;
+    font-weight: 700;
+    src: url("/assets/fonts/lato-v25-latin-700.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  }
+  /* lato-900 - latin */
+  @font-face {
+    font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: "Lato";
+    font-style: normal;
+    font-weight: 900;
+    src: url("/assets/fonts/lato-v25-latin-900.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  }
+
+  body,
+  html {
+    font-family: "Lato", Arial, sans-serif;
+    font-size: 100%;
+    margin: 0;
+    padding: 0;
+    color: var(--bodyTextColor);
+  }
+
+  *,
+  *:before,
+  *:after {
+    margin: 0;
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  body {
+    transition: background-color 0.3s;
+  }
+
+  .container {
+    width: 92%;
+    margin: auto;
+    position: relative;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+    color: var(--headerColor);
+    font-family: "Montserrat", Arial, sans-serif;
+  }
+
+  p,
+  li,
+  a {
+    font-size: (16/16rem);
+    line-height: 1.5em;
+    margin: 0;
+  }
+
+  p,
+  li {
+    color: #353535;
+  }
+
+  a,
+  button {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  // Hidden Screen reader skip nav button
+  .skip {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1111111;
+  }
+}
+
+/* Reset Margins */
+@media only screen and (min-width: 1024px) {
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    font-family: "Lato", Arial, sans-serif;
+  }
+}
+
+/* Scale full website with the viewport width */
+@media only screen and (min-width: 2000px) {
+  body,
+  html {
+    font-size: 0.85vw;
+  }
+}
+
+/* Utility classes */
+@media only screen and (min-width: 0rem) {
+  .cs-hide-on-mobile {
+    display: none;
+  }
+
+  .cs-hide-on-desktop {
+    display: block;
+  }
+}
+/* Desktop - 1024px */
+@media only screen and (min-width: 64rem) {
+  .cs-hide-on-mobile {
+    display: block;
+  }
+
+  .cs-hide-on-desktop {
+    display: none;
+  }
+}
